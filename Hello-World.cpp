@@ -9,55 +9,10 @@
 #include<crtdbg.h>
 #endif
 
-class IInterfaceA
-{
-public:
-    virtual void AFunc(int a) = 0;
-};
+#include "ClassDemo.h"
+#include <iostream>
 
-class IInterfaceB
-{
-public:
-    virtual int BFunc(int b) = 0;
-};
-
-class IInterfaceC
-{
-public:
-    virtual void CFunc(void) = 0;
-};
-
-class MyClass : public IInterfaceA, public IInterfaceB, public IInterfaceC
-{
-private:
-    int m_data;
-public:
-    MyClass() : m_data(0) {}
-
-    virtual void AFunc(int a)
-    {
-        m_data += a;
-        printf("AFunc::my class data is: %d\n", m_data);
-    }
-
-    virtual int BFunc(int b)
-    {
-        m_data -= b;
-        printf("BFunc::my class data is: %d\n", m_data);
-        return m_data;
-    }
-
-    virtual void CFunc(void)
-    {
-        m_data++;
-        printf("CFunc::my class data is: %d\n", m_data);
-    }
-
-    int data()
-    {
-        return m_data;
-    }
-};
+using namespace std;
 
 int** My2DAlloc(int rows, int cols) 
 {
@@ -118,7 +73,6 @@ struct TC
     int z;
 };
 
-
 int _tmain(int argc, _TCHAR* argv[])
 {
     // If your program has several exit points, please add the following statement
@@ -130,7 +84,7 @@ int _tmain(int argc, _TCHAR* argv[])
     IInterfaceA* a = new MyClass();
     a->AFunc(10);
 
-    IInterfaceB* b = dynamic_cast<IInterfaceB*>(a);
+    IInterfaceB* b = reinterpret_cast<IInterfaceB*>(a);
     if (b)
         b->BFunc(20);
 
@@ -144,6 +98,37 @@ int _tmain(int argc, _TCHAR* argv[])
 
     delete a;
 
+    /*  FROM MSDN: 
+        In general you use static_cast when you want to convert numeric data types such as enums to ints or ints to floats, and you are certain of the data types involved in the conversion. 
+        static_cast conversions are not as safe as dynamic_cast conversions, because static_cast does no run-time type check, while dynamic_cast does. 
+        A dynamic_cast to an ambiguous pointer will fail, while a static_cast returns as if nothing were wrong; this can be dangerous. 
+        Although dynamic_cast conversions are safer, dynamic_cast only works on pointers or references, and the run-time type check is an overhead.
+    */
+
+    /*  some comments:
+        Use static_cast. If you know that your Base* points to a Derived, then use static_cast. 
+        dynamic_cast is useful for when it might point to a derived.
+    */
+
+    // test dyanmic_cast and static_cast
+    MyParent* mp = new MyParent();
+    MySon* sp = dynamic_cast<MySon*>(mp);
+    if (!sp)
+        cout << "dynamic_cast failed." << endl; 
+
+    delete mp;
+
+    mp =  new MySon();
+    sp = static_cast<MySon*>(mp);   // both dynamic_cast and static_cast work here as mp is really the type of MySon
+    if (sp)
+        cout << "dynamic_cast succeeded." << endl; 
+    delete sp;
+
+    // 'parent': cann't instantiate abstrace class
+    // parent* ppp =  new parent();
+
+
+
     int** aaa = My2DAlloc(2, 2); 
     free(aaa);
 
@@ -154,7 +139,7 @@ int _tmain(int argc, _TCHAR* argv[])
     _tprintf(L"output 2d Array t[0]: %s\n", t[0]);
     _tprintf(L"output 2d Array t[1]: %s\n", t[1]);
 
-    // !Disable this line of code to make a memory leak, so that we can catch it (in output window of visual studio)
+    // Disable this line of code to make a memory leak, so that we can catch it (in output window of visual studio)
     Ac2DFree<wchar_t>(t);
 
     // if you know where the program will exit or your program only has one exit point
@@ -163,11 +148,17 @@ int _tmain(int argc, _TCHAR* argv[])
 //    _CrtDumpMemoryLeaks();
 //#endif
 
+    // memcpy a struct
     TC tc1(1,2,3);
     TC tc2;
 
     memcpy_s(&tc2, sizeof(TC), &tc1, sizeof(TC));
 
+
+    // test class demo
+    parent* p = new children();
+    p->process();
+    delete p;
 
     system("pause");
 	return 0;
