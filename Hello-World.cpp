@@ -11,6 +11,7 @@
 
 #include "ClassDemo.h"
 #include <iostream>
+#include <vector>
 
 using namespace std;
 
@@ -73,6 +74,93 @@ struct TC
     int z;
 };
 
+template <typename T>
+inline void UnusedVar(const T&);
+
+
+int optimal_trades(int *prices, int n_prices, int N)
+{
+    int i, j, n;
+    int **arr;
+    int max_profit;
+    arr = (int **)malloc(n_prices * sizeof(int**));
+    for (i = 0; i < n_prices; ++i) {
+        arr[i] = (int *)malloc((N+1)*sizeof(int));
+        memset(arr[i], 0, (N+1)*sizeof(int));
+    }
+    arr[n_prices][N];
+
+
+    for (n = 1; n <= N; ++n) {
+        for (i = n_prices - 1; i >= 0; --i) {
+            for (j = i + 1; j < n_prices; ++j) {
+                if (arr[i][n] < prices[j] - prices[i]) {
+                    arr[i][n] = prices[j] - prices[i];
+                }
+                if (arr[i][n] < prices[j] - prices[i] + arr[j][n-1]) {
+                    arr[i][n] = prices[j] - prices[i] + arr[j][n-1];
+                }
+            }
+        }
+    }
+
+
+
+    max_profit = arr[0][N];
+    for (i = 0; i < n_prices; ++i) {
+        free(arr[i]);
+    }
+    free(arr);
+    return max_profit;
+}
+
+/*
+def foo3():
+    l = [1]*n
+    while True:
+        print (*l)
+
+        if l[-1] == 1:
+            l.pop()
+            l[-1] += 1
+        else:
+            l[-2] += 1
+            l[-1:] = [1]*(l[-1] - 1)
+        
+        if l[0] == n:
+            break
+*/
+
+void CalcSequenceNumber(int n)
+{
+    cout << "The input number is " << n << " :" << endl;
+
+    vector<int> v(n);
+    int i = 0;
+    while (i < n) v[i++] = 1;
+
+    while (1)
+    {
+        int j = 0; while (j < v.size()) cout << " " << v[j++]; cout << endl;
+
+        if (v[v.size() - 1] == 1)
+        {
+            v.pop_back();
+            v[v.size() - 1] += 1;
+        }
+        else
+        {
+            v[v.size() - 2] += 1;
+            int k = v[v.size() - 1] - 1;
+            v[v.size() - 1] = 1; k--;
+            while (k-- > 0) v.push_back(1);
+        }
+
+        if (v.at(0) == n)
+            break;
+    }
+}
+
 int _tmain(int argc, _TCHAR* argv[])
 {
     // If your program has several exit points, please add the following statement
@@ -127,6 +215,9 @@ int _tmain(int argc, _TCHAR* argv[])
     // 'parent': cann't instantiate abstrace class
     // parent* ppp =  new parent();
 
+    // error C2259: 'IInterfaceC' : cannot instantiate abstract class
+    // IInterfaceC c;
+
 
 
     int** aaa = My2DAlloc(2, 2); 
@@ -159,6 +250,34 @@ int _tmain(int argc, _TCHAR* argv[])
     parent* p = new children();
     p->process();
     delete p;
+
+    // test virtual destructor 
+    c1* cc1 = new c3();
+    delete cc1;
+    //c2* cc2 = dynamic_cast<c2*>(cc1);
+    //delete cc2;
+
+    //absCC c;
+
+    KA* ka = new KAA();
+    delete ka;
+
+
+    // 
+    int arraya[5] = {7};
+    UnusedVar(arraya);
+
+    CalcSequenceNumber::decompose(3);
+    CalcSequenceNumber::decompose(5);
+
+    CalcSequenceNumber(3);
+    CalcSequenceNumber(5);
+
+    int arrayb[] = {10, 20, 15, 17, 22};
+    int r = optimal_trades(arrayb, 5, 2);
+    int i = 0; while (i < 5) cout << arrayb[i++] << ", "; cout << endl;
+    cout << "total profit is: " << r << endl;
+    
 
     system("pause");
 	return 0;
